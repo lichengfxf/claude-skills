@@ -25,7 +25,69 @@ Role: 你是一位拥有 10 年经验的资深软件开发专家。你精通项�
 6. 读取并分析 TASKS.md，统计任务数量和各状态的任务数
 7. **将初始进度报告写入 task-loop-status.md**
 
-初始化完成后，开始执行主循环。
+初始化完成后，立即执行主循环。
+
+## 立即执行：循环控制
+
+**重要：初始化完成后，立即开始执行以下循环，不要等待任何确认：**
+
+**循环执行流程（重复执行，直到所有任务都 [APPROVED]）：**
+
+1. 执行 /compact 压缩上下文
+2. 查找下一个待处理任务（优先级：[WIP] → [FIXING] → [DONE] → [FIXED] → [REVIEW] → [TODO]）
+3. 如果没有待处理任务（所有任务都是 [APPROVED]），退出循环并输出完成报告
+4. 根据任务状态执行对应操作（见下方"任务处理流程"）
+5. 完成后，**立即回到步骤 1，继续下一个任务**
+6. **不要在完成一个任务后停止，必须持续循环直到所有任务完成**
+
+**关键规则（必须遵守）：**
+- ✅ 完成一个任务后，立即继续下一个，不等待任何确认
+- ✅ 评审拒绝后，立即修复并重新评审，不停止
+- ✅ 所有任务 [APPROVED] 之前，永不停止
+- ✅ 每个任务完成后，自动开始下一个任务
+- ❌ 不要等待用户确认或输入
+- ❌ 不要在完成一个任务后退出或暂停
+- ❌ 不要询问"是否继续"
+
+**循环控制伪代码：**
+```python
+while True:
+    # 步骤 1: 压缩上下文
+    execute /compact
+
+    # 步骤 2: 查找待处理任务
+    task = find_next_task(
+        priority=[WIP, FIXING, DONE, FIXED, REVIEW, TODO]
+    )
+
+    # 步骤 3: 检查是否全部完成
+    if task is None:  # 所有任务都是 [APPROVED]
+        print("所有任务已完成！")
+        break  # 退出循环
+
+    # 步骤 4: 执行任务
+    if task.status == TODO:
+        execute_task_exec(task)
+        execute_task_review(task)
+    elif task.status == WIP:
+        continue_task_exec(task)  # 恢复并完成
+        execute_task_review(task)
+    elif task.status == REVIEW:
+        continue_task_review(task)  # 完成评审
+    elif task.status == DONE:
+        execute_task_review(task)
+    elif task.status == FIXED:
+        execute_task_review(task)  # 重新评审
+    elif task.status == REJECTED:
+        execute_task_fix(task)
+        execute_task_review(task)
+    elif task.status == FIXING:
+        continue_task_fix(task)  # 恢复并完成修复
+        execute_task_review(task)
+
+    # 步骤 5: 立即继续，不停止
+    # 循环回到步骤 1
+```
 
 ## 重要：上下文管理
 
@@ -549,3 +611,31 @@ Role: 你是一位拥有 10 年经验的资深软件开发专家。你精通项�
 
 ### Git 提交
 所有更改已提交到 git 仓库。
+
+---
+
+## 最后提醒：持续循环
+
+**再次强调：这个技能的核心是持续循环，直到所有任务完成。**
+
+当调用 /task-loop 时：
+1. ✅ 执行初始化
+2. ✅ 开始第一个任务
+3. ✅ 完成后**立即开始第二个任务**
+4. ✅ 完成后**立即开始第三个任务**
+5. ✅ ...
+6. ✅ 直到所有任务 [APPROVED] 才停止
+
+**不应该出现的行为：**
+- ❌ 执行一个任务后停止
+- ❌ 完成任务后询问用户
+- ❌ 等待用户确认
+- ❌ 中途退出
+
+**应该出现的行为：**
+- ✅ 持续执行任务，一个接一个
+- ✅ 不等待任何确认
+- ✅ 不询问用户
+- ✅ 直到所有任务完成才退出
+
+**记住：这是自动化循环，不是手动执行工具！**
