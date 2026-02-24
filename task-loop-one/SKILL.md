@@ -15,15 +15,15 @@ Role: 你是一位拥有 10 年经验的资深软件开发专家。你精通项�
 
 1. 检查 TASKS.md 是否存在于当前工作目录
 2. 检查 CONTEXT.md 是否存在（如果不存在，警告用户但继续）
-3. **创建/清空 task-loop-status.md 文件**（进度报告文件）
-4. **创建/清空 task-loop-log.txt 文件**（运行日志文件）
-5. 向 task-loop-log.txt 写入初始日志：
+3. **创建/更新 task-loop-status.md 文件**（进度报告文件，追加更新）
+4. **创建/追加 task-loop-log.txt 文件**（运行日志文件，追加日志）
+5. 向 task-loop-log.txt 追加初始日志：
    ```
-   {当前时间} | INFO  | 启动单次开发循环
-   {当前时间} | INFO  | 初始化进度报告和日志文件
+   {YYYY-MM-DD HH:MM:SS} | INFO  | 启动单次开发循环
+   {YYYY-MM-DD HH:MM:SS} | INFO  | 初始化进度报告和日志文件
    ```
 6. 读取并分析 TASKS.md，统计任务数量和各状态的任务数
-7. **将初始进度报告写入 task-loop-status.md**
+7. **将初始进度报告写入/更新 task-loop-status.md**
 
 初始化完成后，立即执行单次开发循环。
 
@@ -431,7 +431,7 @@ exit  # 停止执行，不继续下一个任务
 3. 调用 /task-loop-one
 
 技能会：
-1. 执行初始化（创建/清空状态和日志文件）
+1. 执行初始化（创建/追加日志文件，更新进度报告）
 2. 读取当前状态
 3. 处理第一个未完成的任务
 4. 完成后停止并输出报告
@@ -484,92 +484,92 @@ exit  # 停止执行，不继续下一个任务
 步骤 0：压缩上下文（最优先）
 ─────────────────────────────────────────
 操作：执行 /compact 命令
-日志：{时间戳} | INFO | 执行 /compact 压缩上下文
+日志：{YYYY-MM-DD HH:MM:SS} | INFO | 执行 /compact 压缩上下文
 说明：在开始任务前，先压缩上下文以减少 Token 消耗
 
 步骤 1：读取任务信息
 ─────────────────────────────────────────
 操作：从 TASKS.md 读取当前任务的完整信息
-日志：{时间戳} | TASK | 读取任务 {编号}：{描述}
+日志：{YYYY-MM-DD HH:MM:SS} | TASK | 读取任务 {编号}：{描述}
 
 步骤 2：执行任务（根据状态）
 ─────────────────────────────────────────
 如果是 [TODO]：
-  日志：{时间戳} | TASK | 执行 task-exec：{编号} {描述}
+  日志：{YYYY-MM-DD HH:MM:SS} | TASK | 执行 task-exec：{编号} {描述}
   操作：调用 task-exec 技能
-  日志：{时间戳} | TASK | 完成 task-exec，状态：[TODO] → [WIP] → [DONE]
+  日志：{YYYY-MM-DD HH:MM:SS} | TASK | 完成 task-exec，状态：[TODO] → [WIP] → [DONE]
   ⚠️ **必须更新 task-loop-status.md**
 
-  日志：{时间戳} | REVIEW | 执行 task-review：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 执行 task-review：{编号}
   操作：调用 task-review 技能
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
   ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [WIP]（开发进行中被打断）：
-  日志：{时间戳} | INFO | 恢复开发中任务：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | INFO | 恢复开发中任务：{编号}
   操作：读取当前进度和已完成的代码，继续开发
-  日志：{时间戳} | TASK | 继续开发，状态：[WIP] → [DONE]
+  日志：{YYYY-MM-DD HH:MM:SS} | TASK | 继续开发，状态：[WIP] → [DONE]
   ⚠️ **必须更新 task-loop-status.md**
 
-  日志：{时间戳} | REVIEW | 执行 task-review：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 执行 task-review：{编号}
   操作：调用 task-review 技能
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
   ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [FIXING]（修复进行中被打断）：
-  日志：{时间戳} | INFO | 恢复修复中任务：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | INFO | 恢复修复中任务：{编号}
   操作：读取评审意见和当前修复进度，继续修复
-  日志：{时间戳} | FIX | 继续修复，状态：[FIXING] → [FIXED]
+  日志：{YYYY-MM-DD HH:MM:SS} | FIX | 继续修复，状态：[FIXING] → [FIXED]
   ⚠️ **必须更新 task-loop-status.md**
 
-  日志：{时间戳} | REVIEW | 重新评审修复：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 重新评审修复：{编号}
   操作：调用 task-review 技能
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
   ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [DONE]（开发完成，待评审）：
-  日志：{时间戳} | REVIEW | 评审已完成任务：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 评审已完成任务：{编号}
   操作：调用 task-review 技能
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
   ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [REVIEW]：
-  日志：{时间戳} | REVIEW | 继续评审任务：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 继续评审任务：{编号}
   操作：调用 task-review 技能完成评审
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[REVIEW] → {结果}
   ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [FIXED]：
-  日志：{时间戳} | REVIEW | 重新评审修复：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 重新评审修复：{编号}
   操作：调用 task-review 技能重新评审
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
   ⚠️ **必须更新 task-loop-status.md**
 
 步骤 3：处理评审结果
 ─────────────────────────────────────────
 如果评审通过 [APPROVED]：
-  日志：{时间戳} | SUCCESS | 任务 {编号} 完成 [APPROVED]
+  日志：{YYYY-MM-DD HH:MM:SS} | SUCCESS | 任务 {编号} 完成 [APPROVED]
   操作：更新 task-loop-status.md
 
 如果评审拒绝 [REJECTED]：
-  日志：{时间戳} | WARN | 任务 {编号} 被拒绝 [REJECTED]
-  日志：{时间戳} | FIX | 开始修复任务：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | WARN | 任务 {编号} 被拒绝 [REJECTED]
+  日志：{YYYY-MM-DD HH:MM:SS} | FIX | 开始修复任务：{编号}
   操作：调用 task-fix 技能
-  日志：{时间戳} | FIX | 完成 task-fix，状态：[REJECTED] → [FIXING] → [FIXED]
+  日志：{YYYY-MM-DD HH:MM:SS} | FIX | 完成 task-fix，状态：[REJECTED] → [FIXING] → [FIXED]
 
-  日志：{时间戳} | REVIEW | 重新评审修复：{编号}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 重新评审修复：{编号}
   操作：调用 task-review 技能重新评审
-  日志：{时间戳} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
+  日志：{YYYY-MM-DD HH:MM:SS} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
 
 步骤 4：更新进度报告
 ─────────────────────────────────────────
 操作：更新 task-loop-status.md
-日志：{时间戳} | INFO | 更新进度报告
+日志：{YYYY-MM-DD HH:MM:SS} | INFO | 更新进度报告
 
 步骤 5：输出总结报告并停止
 ─────────────────────────────────────────
 操作：输出总结报告到控制台
-日志：{时间戳} | INFO | 单次开发循环完成
+日志：{YYYY-MM-DD HH:MM:SS} | INFO | 单次开发循环完成
 操作：停止执行
 ```
 
@@ -662,3 +662,31 @@ exit  # 停止执行，不继续下一个任务
 
 **记住：这是单次执行工具，不是持续循环工具！**
 **记住：task-loop-status.md 必须实时更新，不要遗漏！**
+
+## 重要：日志和进度报告的追加模式
+
+**关键规则：**
+- ✅ **日志文件使用追加模式**：每次执行都向 `task-loop-log.txt` 追加日志，不清空
+- ✅ **进度报告使用更新模式**：每次执行都更新 `task-loop-status.md` 的内容
+- ✅ **时间戳包含完整时间**：所有日志使用 `YYYY-MM-DD HH:MM:SS` 格式（包含时:分:秒）
+
+**为什么使用追加模式？**
+- 保留完整的执行历史
+- 方便追踪多次执行的过程
+- 便于调试和问题排查
+
+**文件更新策略：**
+```markdown
+# 日志文件（task-loop-log.txt）
+- 模式：追加（Append）
+- 格式：每行一条日志，包含完整时间戳
+- 示例：
+  2025-02-24 10:00:00 | INFO  | 启动单次开发循环
+  2025-02-24 10:15:30 | TASK  | 完成 task-exec
+  2025-02-24 10:20:15 | REVIEW | 完成 task-review
+
+# 进度报告（task-loop-status.md）
+- 模式：覆盖（Overwrite）
+- 内容：包含最新的任务状态和统计信息
+- 更新时机：每次状态变更后立即更新
+```
