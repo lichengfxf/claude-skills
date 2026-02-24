@@ -37,17 +37,20 @@ Role: 你是一位拥有 10 年经验的资深软件开发专家。你精通项�
 2. 查找下一个待处理任务（优先级：[WIP] → [FIXING] → [DONE] → [FIXED] → [REVIEW] → [TODO]）
 3. 如果没有待处理任务（所有任务都是 [APPROVED]），退出循环并输出完成报告
 4. 根据任务状态执行对应操作（见下方"任务处理流程"）
-5. 完成后，**立即回到步骤 1，继续下一个任务**
-6. **不要在完成一个任务后停止，必须持续循环直到所有任务完成**
+5. **完成任何状态变更后，立即更新 task-loop-status.md**
+6. 完成后，**立即回到步骤 1，继续下一个任务**
+7. **不要在完成一个任务后停止，必须持续循环直到所有任务完成**
 
 **关键规则（必须遵守）：**
 - ✅ 完成一个任务后，立即继续下一个，不等待任何确认
+- ✅ **每次状态变更后，立即更新 task-loop-status.md**
 - ✅ 评审拒绝后，立即修复并重新评审，不停止
 - ✅ 所有任务 [APPROVED] 之前，永不停止
 - ✅ 每个任务完成后，自动开始下一个任务
 - ❌ 不要等待用户确认或输入
 - ❌ 不要在完成一个任务后退出或暂停
 - ❌ 不要询问"是否继续"
+- ❌ **不要忘记更新 task-loop-status.md**
 
 **循环控制伪代码：**
 ```python
@@ -68,25 +71,39 @@ while True:
     # 步骤 4: 执行任务
     if task.status == TODO:
         execute_task_exec(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
         execute_task_review(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
     elif task.status == WIP:
         continue_task_exec(task)  # 恢复并完成
+        update_task_loop_status()  # ⚠️ 必须更新！
         execute_task_review(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
     elif task.status == REVIEW:
         continue_task_review(task)  # 完成评审
+        update_task_loop_status()  # ⚠️ 必须更新！
     elif task.status == DONE:
         execute_task_review(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
     elif task.status == FIXED:
         execute_task_review(task)  # 重新评审
+        update_task_loop_status()  # ⚠️ 必须更新！
     elif task.status == REJECTED:
         execute_task_fix(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
         execute_task_review(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
     elif task.status == FIXING:
         continue_task_fix(task)  # 恢复并完成修复
+        update_task_loop_status()  # ⚠️ 必须更新！
         execute_task_review(task)
+        update_task_loop_status()  # ⚠️ 必须更新！
 
     # 步骤 5: 立即继续，不停止
     # 循环回到步骤 1
+
+# 重要：update_task_loop_status() 必须在每次状态变更后调用
+# 不要跳过这个步骤！
 ```
 
 ## 重要：上下文管理
@@ -480,41 +497,52 @@ while True:
   日志：{时间戳} | TASK | 执行 task-exec：{编号} {描述}
   操作：调用 task-exec 技能
   日志：{时间戳} | TASK | 完成 task-exec，状态：[TODO] → [WIP] → [DONE]
+  ⚠️ **必须更新 task-loop-status.md**
 
   日志：{时间戳} | REVIEW | 执行 task-review：{编号}
   操作：调用 task-review 技能
   日志：{时间戳} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
+  ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [WIP]（开发进行中被打断）：
   日志：{时间戳} | INFO | 恢复开发中任务：{编号}
   操作：读取当前进度和已完成的代码，继续开发
   日志：{时间戳} | TASK | 继续开发，状态：[WIP] → [DONE]
+  ⚠️ **必须更新 task-loop-status.md**
+
   日志：{时间戳} | REVIEW | 执行 task-review：{编号}
   操作：调用 task-review 技能
   日志：{时间戳} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
+  ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [FIXING]（修复进行中被打断）：
   日志：{时间戳} | INFO | 恢复修复中任务：{编号}
   操作：读取评审意见和当前修复进度，继续修复
   日志：{时间戳} | FIX | 继续修复，状态：[FIXING] → [FIXED]
+  ⚠️ **必须更新 task-loop-status.md**
+
   日志：{时间戳} | REVIEW | 重新评审修复：{编号}
   操作：调用 task-review 技能
   日志：{时间戳} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
+  ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [DONE]（开发完成，待评审）：
   日志：{时间戳} | REVIEW | 评审已完成任务：{编号}
   操作：调用 task-review 技能
   日志：{时间戳} | REVIEW | 完成 task-review，状态：[DONE] → [REVIEW] → {结果}
+  ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [REVIEW]：
   日志：{时间戳} | REVIEW | 继续评审任务：{编号}
   操作：调用 task-review 技能完成评审
   日志：{时间戳} | REVIEW | 完成 task-review，状态：[REVIEW] → {结果}
+  ⚠️ **必须更新 task-loop-status.md**
 
 如果是 [FIXED]：
   日志：{时间戳} | REVIEW | 重新评审修复：{编号}
   操作：调用 task-review 技能重新评审
   日志：{时间戳} | REVIEW | 完成 task-review，状态：[FIXED] → [REVIEW] → {结果}
+  ⚠️ **必须更新 task-loop-status.md**
 
 步骤 3：处理评审结果
 ─────────────────────────────────────────
@@ -631,11 +659,16 @@ while True:
 - ❌ 完成任务后询问用户
 - ❌ 等待用户确认
 - ❌ 中途退出
+- ❌ **忘记更新 task-loop-status.md**
+- ❌ **跳过进度报告更新**
 
 **应该出现的行为：**
 - ✅ 持续执行任务，一个接一个
 - ✅ 不等待任何确认
 - ✅ 不询问用户
 - ✅ 直到所有任务完成才退出
+- ✅ **每次状态变更后，立即更新 task-loop-status.md**
+- ✅ **保持进度报告实时更新**
 
 **记住：这是自动化循环，不是手动执行工具！**
+**记住：task-loop-status.md 必须实时更新，不要遗漏！**
