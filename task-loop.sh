@@ -153,6 +153,15 @@ count_tasks() {
     echo "总计: $total | 已完成: $approved | 待处理: $pending"
 }
 
+# 输出提示到企业微信群
+function log_to_wechat() {
+        local msg="$1"
+
+        curl 'https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=ba6572aa-dec6-40bf-ad55-9c6f141848b6' \
+            -H 'Content-Type: application/json' \
+                -d " { \"msgtype\": \"text\", \"text\": { \"content\": \"$msg\"} }"
+}
+
 #==============================================================================
 # 主循环
 #==============================================================================
@@ -169,6 +178,10 @@ while true; do
     # 检查是否所有任务都已完成
     if all_tasks_approved; then
         echo "🎉 所有任务已完成！"
+        final_status=$(count_tasks)
+        log_to_wechat "🎉 task-loop 所有任务已完成！
+$final_status
+工作目录: $(pwd)"
 
         echo ""
         echo -e "${GREEN}========================================${NC}"
@@ -189,6 +202,11 @@ while true; do
     echo -e "任务状态: ${YELLOW}$task_status${NC}"
     echo ""
 
+    # 发送微信通知：循环开始
+    log_to_wechat "🔄 task-loop 迭代 #$iteration 开始
+$task_status
+工作目录: $(pwd)"
+
     # 构建提示词：使用 task-loop-one 技能
     prompt="使用 task-loop-one 技能完成一次开发循环。"
 
@@ -197,6 +215,9 @@ while true; do
         echo "✅ 迭代 #$iteration 完成"
     else
         echo "❌ 迭代 #$iteration 执行失败"
+        log_to_wechat "❌ task-loop 迭代 #$iteration 执行失败
+$task_status
+工作目录: $(pwd)"
         echo -e "${RED}执行失败${NC}"
         exit 1
     fi
