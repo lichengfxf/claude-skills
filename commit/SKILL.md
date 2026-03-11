@@ -21,7 +21,7 @@ description: 提交修改的内容到git
 - 生成简洁的变更摘要（1-2句话）
 
 ### 3. 更新 CLAUDE.md
-- CLAUDE.md 文件位置：`/home/code/.claude/skills/CLAUDE.md`
+- CLAUDE.md 文件位置：项目根目录 `/home/code/CLAUDE.md`
 - 如果文件不存在，则创建它
 - 在 `## 变更记录` 章节下添加新行，格式：
   ```
