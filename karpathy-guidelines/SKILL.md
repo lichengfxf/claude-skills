@@ -32,7 +32,17 @@ Before implementing:
 
 Ask yourself: "Would a senior engineer say this is overcomplicated?" If yes, simplify.
 
-## 3. Surgical Changes
+## 3. Modularity
+
+**Build focused modules with high cohesion and low coupling.**
+
+- Keep related behavior and data together behind a clear responsibility.
+- Separate unrelated responsibilities instead of letting modules become catch-alls.
+- Communicate through narrow, explicit interfaces rather than implementation details.
+- Avoid circular dependencies and unnecessary shared mutable state.
+- Don't split code into tiny modules when the extra indirection creates no meaningful boundary.
+
+## 4. Surgical Changes
 
 **Touch only what you must. Clean up only your own mess.**
 
@@ -48,7 +58,7 @@ When your changes create orphans:
 
 The test: Every changed line should trace directly to the user's request.
 
-## 4. Goal-Driven Execution
+## 5. Goal-Driven Execution
 
 **Define success criteria. Loop until verified.**
 
