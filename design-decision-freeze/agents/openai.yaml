@@ -1,0 +1,4 @@
+interface:
+  display_name: "Design Decision Freeze"
+  short_description: "Surface open design choices before finalizing a plan"
+  default_prompt: "Use $design-decision-freeze to turn this draft software design into a decision list I can approve."
